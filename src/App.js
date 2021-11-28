@@ -5,23 +5,14 @@ import Box from "@mui/material/Box";
 
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 
-import Button from "@mui/material/Button";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
-import AddIcon from "@mui/icons-material/Add";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 
 import PackageList from "./components/PackageList.js";
 import CustomerList from "./components/CustomerList.js";
@@ -32,7 +23,6 @@ import "./App.css";
 
 function App() {
   const [appData, setAppData] = useState({ customers: [], packages: [] });
-  const [invoices, setInvoices] = useState([]);
   const [drawerState, setDrawerState] = useState(false);
   const [invoiceObj, setInvoiceObj] = useState({});
 
@@ -44,6 +34,30 @@ function App() {
         .then((response) => response.json())
         .then((data) => {
           setAppData(data);
+          let customersInvoiceObj = {};
+          let myDate = createDate();
+
+          data.customers.forEach((customer) => {
+            customersInvoiceObj[customer.id] = createNewInvoiceObj(
+              customer.name,
+              0,
+              0,
+              [],
+              Date.now(),
+              myDate
+            );
+          });
+
+          data.packages.forEach((pack) => {
+            let rightPersonObj = customersInvoiceObj[pack.customerid];
+            let kgInNum = returnNetoWeight(pack.weight);
+            rightPersonObj.totalWeight = rightPersonObj.totalWeight + kgInNum;
+            rightPersonObj.totalPrice = rightPersonObj.totalPrice + pack.price;
+            pack.weight = kgInNum;
+            rightPersonObj.packages.push(pack);
+          });
+
+          setInvoiceObj(customersInvoiceObj);
         });
     }
     return () => {
@@ -51,60 +65,27 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    let data = { ...appData };
-    let customersInvoiceObj = {};
+  const createNewInvoiceObj = (
+    name,
+    totalWeight,
+    totalPrice,
+    packages,
+    invoiceId,
+    invoiceDate
+  ) => {
+    return {
+      name: name,
+      totalWeight: totalWeight,
+      totalPrice: totalPrice,
+      packages: packages,
+      invoiceId: invoiceId,
+      invoiceDate: invoiceDate,
+    };
+  };
 
-    let myDate = new Date();
-
-    data.customers.forEach((customer) => {
-      customersInvoiceObj[customer.id] = {
-        name: customer.name,
-        totalWeight: 0,
-        totalPrice: 0,
-        packages: [],
-        invoiceId: Date.now(),
-        invoiceDate:
-          myDate.getDate() +
-          "-" +
-          (myDate.getMonth() + 1) +
-          "-" +
-          myDate.getFullYear(),
-      };
-    });
-
-    data.packages.forEach((pack) => {
-      let rightPersonObj = customersInvoiceObj[pack.customerid];
-      let onlyNum = +pack.weight.split("kg")[0];
-      rightPersonObj.totalWeight = rightPersonObj.totalWeight + onlyNum;
-      rightPersonObj.totalPrice = rightPersonObj.totalPrice + pack.price;
-
-      let newPackObj = {};
-      newPackObj.price = pack.price;
-      newPackObj.weight = onlyNum;
-      newPackObj.id = pack.id;
-
-      rightPersonObj.packages.push(newPackObj);
-    });
-
-    let newArray = [];
-    let arrayOfKeys = Object.keys(customersInvoiceObj);
-
-    arrayOfKeys.forEach((key) => {
-      let newMinObj = {};
-      newMinObj.id = key;
-      newMinObj.name = customersInvoiceObj[key].name;
-      newMinObj.totalWeight = customersInvoiceObj[key].totalWeight;
-      newMinObj.totalPrice = customersInvoiceObj[key].totalPrice;
-      newMinObj.invoiceId = customersInvoiceObj[key].invoiceId;
-      newMinObj.packagesArray = customersInvoiceObj[key].packages;
-      newArray.push(newMinObj);
-    });
-
-    console.log(customersInvoiceObj);
-    setInvoiceObj(customersInvoiceObj);
-    setInvoices(newArray);
-  }, [appData]);
+  const returnNetoWeight = (stringKg) => {
+    return +stringKg.split("kg")[0];
+  };
 
   const removeClient = (id) => {
     let newAppData = { ...appData };
@@ -116,6 +97,9 @@ function App() {
     });
 
     setAppData(newAppData);
+    let newInvoiceObj = { ...invoiceObj };
+    delete newInvoiceObj[id];
+    setInvoiceObj(newInvoiceObj);
   };
 
   const changeOrder = (direction, index, obj) => {
@@ -134,13 +118,39 @@ function App() {
     setAppData(dataObj);
   };
 
-  const removePackage = (id) => {
+  const removePackage = (packageEl) => {
+    let id = packageEl.id;
     let newAppData = { ...appData };
     let packageToDelete = newAppData.packages.findIndex(
       (element) => element.id === id
     );
     newAppData.packages.splice(packageToDelete, 1);
     setAppData(newAppData);
+
+    let newInvoiceObj = { ...invoiceObj };
+
+    let customerId = packageEl.customerid;
+    let foundPackage = newInvoiceObj[customerId].packages.findIndex(
+      (el) => el.id === id
+    );
+    newInvoiceObj[customerId].packages.splice(foundPackage, 1);
+    newInvoiceObj[customerId].totalWeight =
+      newInvoiceObj[customerId].totalWeight - packageEl.weight;
+    newInvoiceObj[customerId].totalPrice =
+      newInvoiceObj[customerId].totalPrice - packageEl.price;
+    setInvoiceObj(newInvoiceObj);
+  };
+
+  const createDate = () => {
+    let myDate = new Date();
+    let formattedDate =
+      myDate.getDate() +
+      "-" +
+      (myDate.getMonth() + 1) +
+      "-" +
+      myDate.getFullYear();
+
+    return formattedDate;
   };
 
   const addPackcage = (
@@ -152,10 +162,19 @@ function App() {
     packShippingOrder
   ) => {
     let newAppData = { ...appData };
-    let newInvoiceObj = { ...invoiceObj };
+    let invoiceObjNew = { ...invoiceObj };
 
-    if (!newInvoiceObj[packCustomerId]) {
+    if (!invoiceObjNew[packCustomerId]) {
+      let myDate = createDate();
       newAppData.customers.push({ id: packCustomerId, name: customerName });
+      invoiceObjNew[packCustomerId] = createNewInvoiceObj(
+        customerName,
+        0,
+        0,
+        [],
+        Date.now(),
+        myDate
+      );
     }
 
     let newPackage = {
@@ -168,6 +187,13 @@ function App() {
 
     newAppData.packages.push(newPackage);
     setAppData(newAppData);
+
+    invoiceObjNew[packCustomerId].packages.push(newPackage);
+    let newPrice = invoiceObjNew[packCustomerId].totalPrice + packPrice;
+    invoiceObjNew[packCustomerId].totalWeight =
+      invoiceObjNew[packCustomerId].totalWeight + packWeight;
+    invoiceObjNew[packCustomerId].totalPrice = newPrice;
+    setInvoiceObj(invoiceObjNew);
   };
   return (
     <div className="App">
@@ -240,7 +266,7 @@ function App() {
             />
           </Route>
           <Route path="/invoices">
-            <Invoices invoices={invoices} />
+            <Invoices invoiceObj={invoiceObj} />
           </Route>
           <Route path="/printInvoice/:id">
             <OneInvoice invoiceObj={invoiceObj} />

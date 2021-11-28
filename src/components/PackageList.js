@@ -13,7 +13,6 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Input from "@mui/material/Input";
@@ -53,14 +52,20 @@ export default function PackageList({
   };
 
   const addPackage = () => {
-    if (packWeight && packPrice && packShippingOrder && packCustomerId && packCustomerName) {
-      let newPackWeight = packWeight + "kg";
+    if (
+      packWeight &&
+      packPrice &&
+      packShippingOrder &&
+      packCustomerId &&
+      packCustomerName
+    ) {
+      let newPackWeight = +packWeight;
       let newPackPrice = +packPrice;
       let newPackShippingOrder = +packShippingOrder;
       let newCustomerId = +packCustomerId;
       let newPackId = Date.now();
 
-      setPackCustomerName("")
+      setPackCustomerName("");
       setPackWeight("");
       setPackPrice("");
       setPackShippingOrder("");
@@ -200,12 +205,12 @@ export default function PackageList({
                     {invoiceObj[row.customerid] &&
                       invoiceObj[row.customerid].name}
                   </TableCell>
-                  <TableCell>{row.weight}</TableCell>
+                  <TableCell>{row.weight}kg</TableCell>
 
                   <TableCell>${row.price}</TableCell>
                   <TableCell>
                     <Button
-                      onClick={() => removePackage(row.id)}
+                      onClick={() => removePackage(row)}
                       variant="contained"
                     >
                       Delete

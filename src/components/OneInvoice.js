@@ -1,9 +1,11 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 
-export default function OneInvoice({ invoiceObj }) {
+export default function OneInvoice({ invoiceObj, elID }) {
   let { id } = useParams();
-  console.log(invoiceObj[id]);
+  if (!id) {
+    id = elID;
+  }
 
   return (
     <div className="bigInvoiceDiv">
