@@ -1,0 +1,109 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bigInvoiceDiv {
+  padding-top: 100px;
+  width: 53%;
+  margin: 0 auto;
+  text-align: left;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.headerInvoice {
+  margin-left: 10px;
+  margin-right: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  align-items: baseline;
+}
+
+.invoiceBigger {
+  font-size: 28px;
+}
+
+.dateObj {
+  align-self: baseline;
+}
+
+.widthFixed {
+  width: 200px;
+  margin-top: 7px;
+}
+
+.contentPackages {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 50px;
+}
+
+.priceDiv {
+  background-color: #dadada;
+  padding: 20px 100px 10px 16px;
+}
+
+.generalDiv {
+  padding-top: 20px;
+}
+
+.tableTH {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.marginTD {
+  margin-bottom: 10px;
+}
+
+.paddingTopPlz {
+  padding-top: 100px;
+}
+
+.priceBig {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.endInvoice {
+  text-align: center;
+  padding-right: 100px;
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
