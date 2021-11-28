@@ -178,7 +178,7 @@ function App() {
     }
 
     let newPackage = {
-      id: packId,
+      id: "pak" + packId,
       weight: packWeight,
       customerid: packCustomerId,
       price: packPrice,
