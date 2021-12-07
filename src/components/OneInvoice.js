@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
+import { myContextObject } from "../context/MyContext";
+
 import { useParams } from "react-router-dom";
 
-export default function OneInvoice({ invoiceObj, elID }) {
+export default function OneInvoice() {
+  const { invoiceObj } = useContext(myContextObject);
   let { id } = useParams();
-  if (!id) {
-    id = elID;
-  }
 
   return (
     <div className="bigInvoiceDiv">

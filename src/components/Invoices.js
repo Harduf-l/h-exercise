@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useContext } from "react";
+import { myContextObject } from "../context/MyContext";
+
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,38 +13,36 @@ import Button from "@mui/material/Button";
 import { Link } from "react-router-dom";
 import OneInvoice from "../components/OneInvoice.js";
 
-export default function Invoices({ invoiceObj }) {
-  let invoices = Object.keys(invoiceObj);
+export default function Invoices() {
+  const { invoiceObj } = useContext(myContextObject);
+  let invoicesNames;
+  let invoiceArray;
+
+  if (invoiceObj) {
+    invoicesNames = Object.keys(invoiceObj);
+    invoiceArray = [];
+    invoicesNames.forEach((name) => {
+      invoiceArray.push({ ...invoiceObj[name], id: name });
+    });
+  }
+
   return (
-    <div>
-      {invoices.map((el) => {
-        return (
-          <div>
-            <OneInvoice elID={el} invoiceObj={invoiceObj} />
-            <hr />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-//  invoices data in a table - if necessary ////
-
-/* <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Customer Name</TableCell>
-              <TableCell>Total Weight</TableCell>
-              <TableCell>Total Price</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {invoices.map((row) => {
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Customer Name</TableCell>
+            <TableCell>Total Weight</TableCell>
+            <TableCell>Total Price</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {invoiceObj &&
+            invoiceArray.map((row) => {
               return (
                 <TableRow
+                  key={row.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
@@ -61,6 +61,8 @@ export default function Invoices({ invoiceObj }) {
                 </TableRow>
               );
             })}
-          </TableBody>
-        </Table>
-      </TableContainer> */
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}

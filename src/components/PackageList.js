@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { myContextObject } from "../context/MyContext";
+
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -18,38 +20,15 @@ import InputLabel from "@mui/material/InputLabel";
 import Input from "@mui/material/Input";
 import FormHelperText from "@mui/material/FormHelperText";
 
-export default function PackageList({
-  appData,
-  invoiceObj,
-  changeOrder,
-  removePackage,
-  addPackcage,
-}) {
-  let [myAppData, setAppData] = useState(appData);
-  const [sortPackagesByShipping, setsortPackagesByShipping] = useState(true);
+export default function PackageList() {
+  const { appData, invoiceObj, dispatch } = useContext(myContextObject);
+
   let [packWeight, setPackWeight] = useState("");
   let [packPrice, setPackPrice] = useState("");
   let [packCustomerName, setPackCustomerName] = useState("");
   let [packShippingOrder, setPackShippingOrder] = useState("");
   let [packCustomerId, setPackCustomerId] = useState("");
   let [modalState, setModalState] = useState(false);
-
-  useEffect(() => {
-    if (sortPackagesByShipping) {
-      appData.packages.sort(function (a, b) {
-        return a.shippingOrder - b.shippingOrder;
-      });
-    }
-  }, [appData, sortPackagesByShipping]);
-
-  const sortByShipping = () => {
-    let newAppData = { ...appData };
-    newAppData.packages.sort(function (a, b) {
-      return a.shippingOrder - b.shippingOrder;
-    });
-    setAppData(newAppData);
-    setsortPackagesByShipping(true);
-  };
 
   const addPackage = () => {
     if (
@@ -71,14 +50,16 @@ export default function PackageList({
       setPackShippingOrder("");
       setPackCustomerId("");
       setModalState(false);
-      addPackcage(
-        packCustomerName,
-        newPackId,
-        newPackWeight,
-        newCustomerId,
-        newPackPrice,
-        newPackShippingOrder
-      );
+
+      dispatch({
+        type: "ADD_PACKAGE",
+        customerName: packCustomerName,
+        packId: newPackId,
+        packWeight: newPackWeight,
+        packCustomerId: newCustomerId,
+        packPrice: newPackPrice,
+        packShippingOrder: newPackShippingOrder,
+      });
     }
   };
 
@@ -104,9 +85,6 @@ export default function PackageList({
                 >
                   <AddIcon />
                 </IconButton>
-                <Button onClick={() => sortByShipping()}>
-                  order again by shipping time
-                </Button>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -193,53 +171,63 @@ export default function PackageList({
           </Modal>
 
           <TableBody>
-            {appData.packages.map((row, index) => {
-              return (
-                <TableRow
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.id}
-                  </TableCell>
-                  <TableCell component="th" scope="row">
-                    {invoiceObj[row.customerid] &&
-                      invoiceObj[row.customerid].name}
-                  </TableCell>
-                  <TableCell>{row.weight}kg</TableCell>
+            {appData &&
+              appData.packages.map((row, index) => {
+                return (
+                  <TableRow
+                    key={row.id}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row.id}
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {invoiceObj[row.customerid] &&
+                        invoiceObj[row.customerid].name}
+                    </TableCell>
+                    <TableCell>{row.weight}kg</TableCell>
 
-                  <TableCell>${row.price}</TableCell>
-                  <TableCell>
-                    <Button
-                      onClick={() => removePackage(row)}
-                      variant="contained"
-                    >
-                      Delete
-                    </Button>
+                    <TableCell>${row.price}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() =>
+                          dispatch({ type: "REMOVE_PACKAGE", packageEl: row })
+                        }
+                        variant="contained"
+                      >
+                        Delete
+                      </Button>
 
-                    <i
-                      onClick={(e) => {
-                        setsortPackagesByShipping(false);
-                        changeOrder("up", index, row);
-                      }}
-                      className="up"
-                      style={{ cursor: "pointer", marginLeft: "20px" }}
-                    >
-                      <ArrowUpwardIcon />
-                    </i>
-                    <i
-                      onClick={(e) => {
-                        setsortPackagesByShipping(false);
-                        changeOrder("down", index, row);
-                      }}
-                      className="down"
-                      style={{ cursor: "pointer", marginLeft: "20px" }}
-                    >
-                      <ArrowDownwardIcon />
-                    </i>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                      <i
+                        onClick={(e) => {
+                          dispatch({
+                            type: "CHANGE_ORDER",
+                            direction: "up",
+                            index,
+                          });
+                        }}
+                        className="up"
+                        style={{ cursor: "pointer", marginLeft: "20px" }}
+                      >
+                        <ArrowUpwardIcon />
+                      </i>
+                      <i
+                        onClick={(e) => {
+                          dispatch({
+                            type: "CHANGE_ORDER",
+                            direction: "down",
+                            index,
+                          });
+                        }}
+                        className="down"
+                        style={{ cursor: "pointer", marginLeft: "20px" }}
+                      >
+                        <ArrowDownwardIcon />
+                      </i>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>
