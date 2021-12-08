@@ -28,12 +28,9 @@ function App() {
   const [drawerState, setDrawerState] = useState(false);
 
   useEffect(() => {
-    fetchData();
-    async function fetchData() {
-      let data = await fetch("/data.json").then((response) => response.json());
-
-      dispatch({ type: "FETCH_DATA_COMPLETED", data });
-    }
+    fetch("/data.json")
+      .then((response) => response.json())
+      .then((data) => dispatch({ type: "FETCH_DATA_COMPLETED", data }));
   }, []);
 
   return (
